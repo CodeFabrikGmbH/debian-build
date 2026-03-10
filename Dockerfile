@@ -1,9 +1,11 @@
 # Stage 1: Build Oxipng
-FROM rust:1.78 as builder
+FROM rust:slim-bookworm AS builder
+
 RUN cargo install oxipng
 
 # Stage 2: Final Container
 FROM debian:bookworm-slim
+
 RUN apt-get update && apt-get install -y \
     bash \
     jq \
