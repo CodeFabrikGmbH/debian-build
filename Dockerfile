@@ -1,6 +1,9 @@
-FROM debian:bookworm-slim
+# Stage 1: Build Oxipng
+FROM rust:1.78 as builder
+RUN cargo install oxipng
 
-# Basis-Tools
+# Stage 2: Final Container
+FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y \
     bash \
     jq \
@@ -14,16 +17,14 @@ RUN apt-get update && apt-get install -y \
     webp \
     && rm -rf /var/lib/apt/lists/*
 
-# Python-venv
+# Python venv
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --upgrade pip
 RUN pip install requests
 
-# Oxipng Binary direkt herunterladen
-RUN curl -L -o /usr/local/bin/oxipng \
-    https://github.com/shssoichiro/oxipng/releases/download/v10.1.0/oxipng-x86_64-unknown-linux-gnu \
-    && chmod +x /usr/local/bin/oxipng
+# Oxipng vom Builder kopieren
+COPY --from=builder /usr/local/cargo/bin/oxipng /usr/local/bin/oxipng
 
 # Prüfen
 RUN oxipng --version
