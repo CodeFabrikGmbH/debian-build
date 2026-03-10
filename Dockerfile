@@ -12,19 +12,18 @@ RUN apt-get update && apt-get install -y \
     pngquant \
     jpegoptim \
     webp \
-    build-essential \
-    rustc \
-    cargo \
     && rm -rf /var/lib/apt/lists/*
 
-# Oxipng via Cargo installieren
-RUN cargo install oxipng
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Python-virtualenv erstellen
+# Python-venv
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-
-# Python-Pakete in venv installieren
 RUN pip install --upgrade pip
 RUN pip install requests
+
+# Oxipng Binary direkt herunterladen
+RUN curl -L -o /usr/local/bin/oxipng \
+    https://github.com/shssoichiro/oxipng/releases/download/v10.1.0/oxipng-x86_64-unknown-linux-gnu \
+    && chmod +x /usr/local/bin/oxipng
+
+# Prüfen
+RUN oxipng --version
